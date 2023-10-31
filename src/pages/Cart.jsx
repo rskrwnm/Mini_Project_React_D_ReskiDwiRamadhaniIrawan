@@ -106,81 +106,58 @@ const Cart = () => {
           Back
         </button>
       </div>
-      <div className="w-full overflow-x-auto">
-        {items.length !== 0 ? (
-          <table className="w-full table-auto">
-            <thead>
-              <tr>
-                <th className="px-4 py-2">Product</th>
-                <th className="px-4 py-2">Category</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Quantity</th>
-                <th className="px-4 py-2">Total</th>
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => (
-                <tr key={index}>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center">
-                      <img
-                        src={item?.image ?? 'https://placehold.co/600x500'}
-                        alt={item?.name}
-                        className="w-20 h-20 object-cover"
-                      />
-                      <p className="ml-2">{item?.name || 'Unknown Product'}</p>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">{item?.category || 'Unknown Category'}</td>
-                  <td className="px-4 py-2">Rp. {item?.price || 0}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex items-center">
-                      <button
-                        onClick={() => decrementQuantity(index)}
-                        className="bg-[#1976D2] text-white px-2 py-1 rounded-l hover:bg-[#A0E9FF] transition-colors"
-                      >
-                        -
-                      </button>
-                      <input
-                        type="text"
-                        min="1"
-                        value={quantities[index] || 1}
-                        onChange={(e) => handleQuantityChange(index, e.target.value)}
-                        className="text-black bg-transparent w-10 text-center border-none"
-                      />
-                      <button
-                        onClick={() => incrementQuantity(index)}
-                        className="bg-[#1976D2] text-white px-2 py-1 rounded-r hover:bg-[#A0E9FF] transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2">Rp. {item?.price * (quantities[index] || 1)}</td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleRent(index)}
-                      className="bg-[#1976D2] hover:bg-[#A0E9FF] text-white px-2 py-1 rounded-full mr-2"
-                    >
-                      Rent
-                    </button>
-                    <button
-                      onClick={() => handleRemoveItem(index)}
-                      className="bg-red-600 hover:bg-red-800 text-white px-2 py-1 rounded-full"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="w-full h-screen flex items-center justify-center">
-            <p className="text-2xl text-red-500">No data</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+        {items.map((item, index) => (
+          <div key={index} className="border border-gray-200 p-4 rounded-lg shadow-lg">
+            <div className="mb-2">
+              <img
+                src={item?.image || 'https://placehold.co/600x500'}
+                alt={item?.name || 'Unknown Product'}
+                className="w-full h-72 object-cover rounded-lg"
+              />
+            </div>
+            <h3 className="text-lg font-semibold">{item?.name || 'Unknown Product'}</h3>
+            <p className="text-gray-500">{item?.category || 'Unknown Category'}</p>
+            <p className="text-gray-700 mt-2">Price: Rp. {item?.price || 0}</p>
+            <div className="flex justify-between items-center mt-4">
+              <div>
+                <button
+                  onClick={() => handleRent(index)}
+                  className="bg-[#1976D2] hover:bg-[#A0E9FF] text-white px-2 py-1 rounded-full mr-2"
+                >
+                  Rent
+                </button>
+                <button
+                  onClick={() => handleRemoveItem(index)}
+                  className="bg-red-600 hover:bg-red-800 text-white px-2 py-1 rounded-full"
+                >
+                  Remove
+                </button>
+              </div>
+              <div className="flex items-center">
+                <button
+                  onClick={() => decrementQuantity(index)}
+                  className="bg-[#1976D2] text-white px-2 py-1 rounded-l hover:bg-[#A0E9FF] transition-colors"
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  min="1"
+                  value={quantities[index] || 1}
+                  onChange={(e) => handleQuantityChange(index, e.target.value)}
+                  className="text-black bg-transparent w-10 text-center border-none"
+                />
+                <button
+                  onClick={() => incrementQuantity(index)}
+                  className="bg-[#1976D2] text-white px-2 py-1 rounded-r hover-bg-[#A0E9FF] transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
           </div>
-        )}
+        ))}
       </div>
       {showCheckoutPopup && selectedItemIndex !== null && items[selectedItemIndex] && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">

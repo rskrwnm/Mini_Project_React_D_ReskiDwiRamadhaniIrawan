@@ -27,14 +27,15 @@ function ChatBot() {
 
   return (
     <section className="bg-gradient h-screen flex flex-col justify-center items-center p-3">
-      <div className="container mx-auto max-w-xl p-5 bg-wite rounded-lg shadow-lg">
-        <h1 className="text-3xl font-semibold text-center mb-5">Halo, Tanya tentang alat camping di sini</h1>
+      <div className="container mx-auto max-w-xl p-5 bg-white rounded-lg shadow-lg">
+        <h1 className="text-3xl font-semibold text-center mb-5 text-black-600">Halo, Tanya tentang alat camping di sini</h1>
         <div className="input-container">
           <Chat
             id="openai"
             placeholder="Tanyakan pertanyaanmu di sini"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            className="w-full p-2 rounded-md border"
           />
           <button
             onClick={handleResult}
@@ -43,7 +44,7 @@ function ChatBot() {
             Kirim
           </button>
         </div>
-        {loading && <div className="text-center text-gray-500 mt-2">Plese Wait, in progress...</div>}
+        {loading && <div className="text-center text-gray-500 mt-2">Please Wait, in progress...</div>}
       </div>
       <div className="container mx-auto mt-5 p-5 bg-white rounded-lg shadow-lg">
         <textarea
