@@ -49,6 +49,7 @@ const Header = () => {
               src={cartIcon}
               alt="Cart Icon"
               width={30}
+              style={{ filter: 'brightness(0) invert(1)' }}
             />
           </button>
         </div>
@@ -63,7 +64,7 @@ const Header = () => {
             <button onClick={() => navigate('/login')} className="hover:text-[#008170]">
               Log In
             </button>
-            <button onClick={() => navigate('/Register')} className="bg-[#008170] w-20 h-10 rounded hover:bg-[# E6E6FA]">
+            <button onClick={() => navigate('/Register')} className="bg-[#008170] w-20 h-10 rounded hover:bg-[#E6E6FA]">
               Register
             </button>
           </div>
