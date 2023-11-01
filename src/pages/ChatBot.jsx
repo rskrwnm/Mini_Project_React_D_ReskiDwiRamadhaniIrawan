@@ -28,11 +28,11 @@ function ChatBot() {
   return (
     <section className="bg-gradient h-screen flex flex-col justify-center items-center p-3">
       <div className="container mx-auto max-w-xl p-5 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-semibold text-center mb-5 text-black-600">Halo, Tanya tentang alat camping di sini</h1>
+        <h1 className="text-3xl font-semibold text-center mb-5 text--600">Hello, Ask about camping equipment here</h1>
         <div className="input-container">
           <Chat
             id="openai"
-            placeholder="Tanyakan pertanyaanmu di sini"
+            placeholder="Ask your question here"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="w-full p-2 rounded-md border"
@@ -41,7 +41,7 @@ function ChatBot() {
             onClick={handleResult}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-4 py-2 mt-2"
           >
-            Kirim
+            Submit
           </button>
         </div>
         {loading && <div className="text-center text-gray-500 mt-2">Please Wait, in progress...</div>}
@@ -51,7 +51,7 @@ function ChatBot() {
           value={result}
           onChange={(e) => setResult(e.target.value)}
           className="w-full h-32 p-2 rounded-md border"
-          placeholder="Jawaban akan ditampilkan di sini"
+          placeholder="The answer will be displayed here"
         />
       </div>
     </section>
