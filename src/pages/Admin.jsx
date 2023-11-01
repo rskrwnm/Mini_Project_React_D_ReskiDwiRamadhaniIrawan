@@ -248,7 +248,7 @@ const Admin = () => {
                 <input
                   type="text"
                   id="price"
-                  placeholder="$ 1"
+                  placeholder="1"
                   value={price}
                   onChange={handleProductPriceChange}
                   className="bg-white border border-gray-300 w-[500px] text-gray-900 text-sm rounded-lg p-2.5"
