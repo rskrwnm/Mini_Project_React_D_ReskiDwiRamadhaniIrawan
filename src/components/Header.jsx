@@ -61,7 +61,7 @@ const Header = () => {
           </div>
         ) : (
           <div className="flex items-center gap-x-4">
-            <button onClick={() => navigate('/login')} className="hover:text-[#008170]">
+            <button onClick={() => navigate('/login')} className="hover:text-blue-500">
               Log In
             </button>
             <button onClick={() => navigate('/Register')} className="bg-[#008170] w-20 h-10 rounded hover:bg-[#E6E6FA]">
