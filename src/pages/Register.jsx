@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import api, { getErrorMessage } from "../api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     if (!email || !password || password !== confirmPassword) {
@@ -20,19 +21,26 @@ const Register = () => {
       return;
     }
 
-    const user = { email, password };
-    localStorage.setItem("user", JSON.stringify(user));
+    try {
+      await api.post("/auth/register", { email, password });
 
-    Swal.fire({
-      icon: "success",
-      title: "Registration Successful!",
-      text: "You can now log in with your credentials.",
-      confirmButtonText: "OK",
-    }).then((res) => {
-      if (res.isConfirmed) {
-        navigate("/login");
-      }
-    });
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful!",
+        text: "You can now log in with your credentials.",
+        confirmButtonText: "OK",
+      }).then((res) => {
+        if (res.isConfirmed) {
+          navigate("/login");
+        }
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: getErrorMessage(error, "Registration failed. Please try again."),
+      });
+    }
   };
 
   return (

@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
+
+const CATEGORY_STYLE = {
+  Tenda: "bg-green-100 text-green-700",
+  "Alat Tidur": "bg-blue-100 text-blue-700",
+  "Peralatan Masak": "bg-orange-100 text-orange-700",
+};
 
 const Card = ({
   id,
@@ -10,61 +16,52 @@ const Card = ({
   handleAddtoCart,
   showCartButton,
 }) => {
-  const [quantity, setQuantity] = useState(0);
-
-  const cardStyle = {
-    backgroundColor: "white",
-    color: "black",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    border: "1px solid #E5E5E5",
-  };
-
-  const priceStyle = {
-    color: "#008170",
-  };
-
-  const handleIncreaseQuantity = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1);
-  };
-
-  const handleDecreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity((prevQuantity) => prevQuantity - 1);
-    }
-  };
-
   return (
     <div
       id={id}
-      className="max-w-sm rounded overflow-hidden shadow-lg"
-      style={cardStyle}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
-      <img
-        src={image ?? "https://placehold.co/500x400"}
-        alt={name}
-        className="w-full h-64 object-cover"
-      />
-      <div className="p-4">
-        <h2 className="text-xl font-semibold mb-2 text-blue-700">{name}</h2>
-        <p className="text-gray-600 mb-4">{category.join(', ')}</p>
-        <div className="text-gray-800 font-semibold text-lg">Rp. {price} / Hari</div>
+      <div className="relative overflow-hidden">
+        <img
+          src={image ?? "https://placehold.co/500x400"}
+          alt={name}
+          onClick={handleNavigateDetails}
+          className="h-56 w-full cursor-pointer object-cover transition duration-500 group-hover:scale-105"
+        />
+        <div className="absolute left-3 top-3 flex gap-1">
+          {category.map((cat) => (
+            <span
+              key={cat}
+              className={`rounded-full px-3 py-1 text-xs font-semibold shadow ${
+                CATEGORY_STYLE[cat] || "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {cat}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-5">
+        <h2 className="mb-1 text-lg font-semibold text-gray-800">{name}</h2>
+        <p className="mb-4 text-lg font-bold text-emerald-700">
+          Rp {Number(price).toLocaleString("id-ID")}
+          <span className="text-sm font-normal text-gray-400"> / hari</span>
+        </p>
+
         {showCartButton && (
-          <div className="flex justify-between items-center m-auto mb-2">
+          <div className="mt-auto grid grid-cols-2 gap-2">
             <button
               onClick={handleNavigateDetails}
-              className="text-center px-4 py-2 mt-2 bg-blue-500 rounded hover:bg-blue-700 text-white"
+              className="rounded-lg border border-emerald-600 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
             >
-              Product Details
+              Detail
             </button>
             <button
               onClick={handleAddtoCart}
-              className="text-center px-4 py-2 mt-2 bg-blue-500 rounded hover:bg-blue-700 text-white" 
+              className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
             >
-              Add to Cart
+              + Keranjang
             </button>
           </div>
         )}

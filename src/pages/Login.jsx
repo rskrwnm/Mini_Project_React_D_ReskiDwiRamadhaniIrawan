@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import api, { getErrorMessage } from "../api";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -19,48 +20,28 @@ const Login = () => {
       return;
     }
 
-    const adminCredentials = { email: "admin@gmail.com", password: "admin123" };
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    try {
+      const { data } = await api.post("/auth/login", { email, password });
+      const isAdmin = data.user.role === "admin";
 
-    if (email === adminCredentials.email && password === adminCredentials.password) {
+      localStorage.setItem("token", data.token);
       localStorage.setItem("isLoggedIn", true);
-
-      const user = {
-        email,
-      };
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       Swal.fire({
         icon: "success",
-        title: "Admin Successfully Logged In!",
+        title: isAdmin ? "Admin Successfully Logged In!" : "Successfully Logged In!",
         confirmButtonText: "OK",
       }).then((res) => {
         if (res.isConfirmed) {
-          navigate("/admin");
+          navigate(isAdmin ? "/admin" : "/");
         }
       });
-    } else if (storedUser && storedUser.email === email && storedUser.password === password) {
-      localStorage.setItem("isLoggedIn", true);
-
-      const user = {
-        email,
-      };
-      localStorage.setItem("user", JSON.stringify(user));
-
-      Swal.fire({
-        icon: "success",
-        title: "Successfully Logged In!",
-        confirmButtonText: "OK",
-      }).then((res) => {
-        if (res.isConfirmed) {
-          navigate("/");
-        }
-      });
-    } else {
+    } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Email and password are not available. Please, sign-up first.",
+        text: getErrorMessage(error, "Login failed. Please try again."),
       });
     }
   };
