@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { addItem } from '../features/cartSlice';
 import Swal from 'sweetalert2';
 
@@ -12,29 +12,12 @@ const Home = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState('Semua');
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const isLoggedIn = localStorage.getItem("authToken");
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-  };
-
-  const fetchData = async () => {
-    try {
-      let apiUrl = "https://6535cec8c620ba9358ecad63.mockapi.io/product";
-
-      if (selectedCategory !== "Semua") { 
-        apiUrl += `?category=${selectedCategory}`;
-      }
-
-      const response = await axios.get(apiUrl);
-
-      setProducts(response.data); 
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
   };
 
   const handleAddToCart = (product) => {
@@ -71,6 +54,21 @@ const Home = () => {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get("/products", {
+          params: selectedCategory === "Semua" ? {} : { category: selectedCategory },
+        });
+        setProducts(response.data);
+        setLoadError("");
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setLoadError(error.response?.data?.message || "Could not load products. Check that the API and database are running.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, [selectedCategory]);
 
@@ -111,6 +109,9 @@ const Home = () => {
       <p className="text-center pt-4 text-2xl text-gray-600">Loading...</p>
     </div>
   ) : (
+    loadError ? (
+      <p className="text-center text-red-600">{loadError}</p>
+    ) : (
     <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {products.map((product) => (
         <Card
@@ -130,6 +131,7 @@ const Home = () => {
         />
       ))}
     </div>
+    )
   )}
 </div>
 </div>

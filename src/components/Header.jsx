@@ -15,7 +15,7 @@ const Header = () => {
       cancelButtonText: 'No',
     }).then((response) => {
       if (response.isConfirmed) {
-        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         navigate('/login');
       }
@@ -53,7 +53,7 @@ const Header = () => {
             />
           </button>
         </div>
-        {localStorage.getItem('isLoggedIn') ? (
+        {localStorage.getItem('authToken') ? (
           <div>
             <button onClick={handleLogout} className="bg-[#008170] w-20 h-10 rounded hover:bg-[#008170]">
               Log Out

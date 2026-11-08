@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
+import api from '../utils/api';
 
 const Admin = () => {
     const [name, setProductName] = useState("");
@@ -14,26 +14,27 @@ const Admin = () => {
     const [imageError, setImageError] = useState("");
     const [loading, setLoading] = useState(true);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [loadError, setLoadError] = useState("");
 
     const navigate = useNavigate();
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const isLoggedIn = localStorage.getItem("authToken");
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
     useEffect(() => {
-      if (!isLoggedIn) {
+      if (!isLoggedIn || currentUser.role !== "admin") {
         navigate("/login");
       }
-    }, [isLoggedIn, navigate])
+    }, [isLoggedIn, currentUser.role, navigate])
     
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(
-                "https://6535cec8c620ba9358ecad63.mockapi.io/product"
-                );
+                const response = await api.get("/products");
                 setProductData(response.data);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                setLoadError(error.response?.data?.message || "Could not load products from the server.");
                 setLoading(false);
             }
             };
@@ -52,7 +53,11 @@ const Admin = () => {
         
           const handleImageChange = async (e) => {
             const file = e.target.files[0];
-        
+
+            if (!file) {
+              return;
+            }
+
             if (file && !file.type.startsWith("image/")) {
               setImageError("The selected file is not an image.");
             } else {
@@ -105,59 +110,50 @@ const Admin = () => {
               alert("Please fill in all fields before adding product!");
               return;
             }
-            if (!image) {
+            if (!image && !editingProduct) {
               alert("Please select an image for the product.");
               return;
             }
-          
-            const reader = new FileReader();
-            reader.onloadend = async () => {
+
+            try {
+              const imageData = image
+                ? await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error("Could not read the selected image."));
+                    reader.readAsDataURL(image);
+                  })
+                : editingProduct.image;
               const updatedProduct = {
                 name,
                 category: [category],
-                image: reader.result ? reader.result : editingProduct.image,
+                image: imageData,
                 description,
                 price,
               };
-          
-              try {
-                if (editingProduct) {
-                  const response = await axios.put(
-                    `https://6535cec8c620ba9358ecad63.mockapi.io/product/${editingProduct.id}`,
-                    updatedProduct
-                  );
-          
-                  alert("Product updated successfully!");
-          
-                  const updatedProductData = productData.map((product) =>
-                    product.id === response.data.id ? response.data : product
-                  );
-          
-                  setProductData(updatedProductData);
-                } else {
-                  const response = await axios.post(
-                    "https://6535cec8c620ba9358ecad63.mockapi.io/product",
-                    updatedProduct
-                  );
-          
-                  alert("Product added successfully!");
-          
-                  setProductData((prevData) => [...prevData, response.data]);
-                }
-          
-                setEditingProduct(null);
-                setProductName("");
-                setProductCategory("");
-                setProductImage(null);
-                setProductPrice("");
-                setdescription("");
-              } catch (error) {
-                console.error("Error adding/updating product:", error);
-                alert("Failed to add/update product. Please try again later.");
+
+              if (editingProduct) {
+                const response = await api.put(`/products/${editingProduct.id}`, updatedProduct);
+                setProductData((products) =>
+                  products.map((product) => product.id === response.data.id ? response.data : product)
+                );
+                alert("Product updated successfully!");
+              } else {
+                const response = await api.post("/products", updatedProduct);
+                setProductData((products) => [...products, response.data]);
+                alert("Product added successfully!");
               }
-            };
-          
-            reader.readAsDataURL(image);
+
+              setEditingProduct(null);
+              setProductName("");
+              setProductCategory("");
+              setProductImage(null);
+              setProductPrice("");
+              setdescription("");
+            } catch (error) {
+              console.error("Error adding/updating product:", error);
+              alert(error.response?.data?.message || "Failed to save product. Please try again.");
+            }
           };
           
           const handleDeleteConfirmation = (productId) => {
@@ -166,9 +162,7 @@ const Admin = () => {
         
           const handleDelete = async () => {
             try {
-              await axios.delete(
-                `https://6535cec8c620ba9358ecad63.mockapi.io/product/${productToDelete}`
-              );
+              await api.delete(`/products/${productToDelete}`);
         
               const updatedProductData = productData.filter(
                 (product) => product.id !== productToDelete
@@ -179,7 +173,7 @@ const Admin = () => {
               alert("Product deleted successfully!");
             } catch (error) {
               console.error("Error deleting product:", error);
-              alert("Failed to delete product. Please try again later.");
+              alert(error.response?.data?.message || "Failed to delete product. Please try again.");
             }
           };
 
@@ -193,6 +187,7 @@ const Admin = () => {
     </div>
       ) : (
         <div>
+          {loadError && <p className="text-center text-red-600">{loadError}</p>}
           <form onSubmit={handleSubmit}>
             <div className="mt-14 flex flex-col items-center gap-1">
               <h4 className="mb-2 text-lg font-semibold pr-[380px]">

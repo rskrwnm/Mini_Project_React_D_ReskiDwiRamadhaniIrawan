@@ -8,7 +8,7 @@ const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items } = useSelector((state) => state.cart);
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  const isLoggedIn = localStorage.getItem('authToken');
 
   const [showCheckoutPopup, setShowCheckoutPopup] = useState(false);
   const [selectedItemIndex, setSelectedItemIndex] = useState(null);
