@@ -1,5 +1,5 @@
-// Helper sesi. Dipakai hanya untuk memilih tampilan (menu/layout).
-// Keamanan sebenarnya tetap dijaga server (JWT + role di database).
+// Helper sesi admin. Dipakai hanya untuk memilih tampilan.
+// Keamanan sebenarnya tetap dijaga server (JWT + pengecekan akun di database).
 
 export const getStoredUser = () => {
   try {
@@ -11,11 +11,6 @@ export const getStoredUser = () => {
 
 export const isLoggedIn = () =>
   !!localStorage.getItem("isLoggedIn") && !!localStorage.getItem("token");
-
-export const isAdminUser = () =>
-  isLoggedIn() && getStoredUser()?.role === "admin";
-
-export const homePathFor = () => (isAdminUser() ? "/admin" : "/");
 
 export const clearSession = () => {
   localStorage.removeItem("token");

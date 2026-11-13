@@ -1,38 +1,32 @@
 import React, { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import {
+  CalendarIcon,
   ChartPieIcon,
+  ClipboardListIcon,
+  CogIcon,
   CubeIcon,
-  HomeIcon,
   LogoutIcon,
   MenuIcon,
-  ShoppingCartIcon,
-  UsersIcon,
+  ShieldCheckIcon,
   XIcon,
 } from "@heroicons/react/outline";
 import { clearSession, getStoredUser } from "../auth";
 
-const ADMIN_MENU = [
+const MENU = [
   { to: "/admin", label: "Ringkasan", icon: ChartPieIcon, end: true },
+  { to: "/admin/rentals", label: "Penyewaan", icon: ClipboardListIcon },
+  { to: "/admin/calendar", label: "Kalender", icon: CalendarIcon },
   { to: "/admin/products", label: "Kelola Produk", icon: CubeIcon },
-  { to: "/admin/users", label: "Kelola User", icon: UsersIcon },
+  { to: "/admin/admins", label: "Kelola Admin", icon: ShieldCheckIcon },
+  { to: "/admin/settings", label: "Pengaturan", icon: CogIcon },
 ];
 
-const USER_MENU = [
-  { to: "/", label: "Katalog", icon: HomeIcon, end: true },
-  { to: "/cart", label: "Keranjang", icon: ShoppingCartIcon, badge: true },
-];
-
-// Layout sidebar untuk admin dan user yang sudah login.
-const DashboardLayout = ({ role }) => {
+// Layout sidebar untuk dashboard admin.
+const DashboardLayout = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const cartCount = useSelector((state) => state.cart.items.length);
-
-  const isAdmin = role === "admin";
-  const menu = isAdmin ? ADMIN_MENU : USER_MENU;
   const user = getStoredUser();
 
   const handleLogout = () => {
@@ -63,7 +57,7 @@ const DashboardLayout = ({ role }) => {
         <img src="/Logo.png" alt="Logo" className="h-10 w-10 object-contain" />
         <div>
           <p className="text-lg font-bold leading-tight">RentCampy</p>
-          <p className="text-xs text-gray-400">{isAdmin ? "Panel Admin" : "Panel User"}</p>
+          <p className="text-xs text-gray-400">Panel Admin</p>
         </div>
       </div>
 
@@ -71,7 +65,7 @@ const DashboardLayout = ({ role }) => {
         <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
           Menu
         </p>
-        {menu.map(({ to, label, icon: Icon, end, badge }) => (
+        {MENU.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
             to={to}
@@ -81,11 +75,6 @@ const DashboardLayout = ({ role }) => {
           >
             <Icon className="h-5 w-5" />
             <span className="flex-1">{label}</span>
-            {badge && cartCount > 0 && (
-              <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-bold text-gray-900">
-                {cartCount}
-              </span>
-            )}
           </NavLink>
         ))}
       </nav>
@@ -93,12 +82,8 @@ const DashboardLayout = ({ role }) => {
       <div className="border-t border-gray-800 p-4">
         <div className="mb-3 px-1">
           <p className="truncate text-sm font-medium">{user?.email}</p>
-          <span
-            className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${
-              isAdmin ? "bg-amber-400 text-gray-900" : "bg-emerald-500/20 text-emerald-300"
-            }`}
-          >
-            {isAdmin ? "Admin" : "User"}
+          <span className="mt-1 inline-block rounded-full bg-amber-400 px-2 py-0.5 text-xs font-semibold text-gray-900">
+            Admin
           </span>
         </div>
         <button
