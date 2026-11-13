@@ -4,10 +4,11 @@ import imageCompression from 'browser-image-compression';
 import Pagination from '../components/Pagination';
 import { confirmDelete, notifyError, notifySuccess, notifyWarning } from '../alert';
 
-const CATEGORIES = ['Tenda', 'Alat Tidur', 'Peralatan Masak'];
+const CATEGORIES = ['Tenda', 'Carrier', 'Alat Tidur', 'Peralatan Masak'];
 
 const CATEGORY_STYLE = {
   Tenda: 'bg-green-100 text-green-700',
+  Carrier: 'bg-purple-100 text-purple-700',
   'Alat Tidur': 'bg-blue-100 text-blue-700',
   'Peralatan Masak': 'bg-orange-100 text-orange-700',
 };
@@ -25,6 +26,8 @@ const Admin = () => {
   const [category, setProductCategory] = useState('');
   const [image, setProductImage] = useState(null);
   const [price, setProductPrice] = useState('');
+  const [stock, setStock] = useState('');
+  const [deposit, setDeposit] = useState('');
   const [description, setdescription] = useState('');
   const [productData, setProductData] = useState([]);
   const [imageError, setImageError] = useState('');
@@ -54,6 +57,8 @@ const Admin = () => {
     setProductCategory('');
     setProductImage(null);
     setProductPrice('');
+    setStock('');
+    setDeposit('');
     setdescription('');
     setImageError('');
   };
@@ -86,6 +91,8 @@ const Admin = () => {
     setProductCategory(productToEdit.category[0]);
     setProductImage(null);
     setProductPrice(productToEdit.price);
+    setStock(productToEdit.stock);
+    setDeposit(productToEdit.deposit);
     setdescription(productToEdit.description);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -101,7 +108,7 @@ const Admin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name.trim() || !category || price === '' || !description.trim()) {
+    if (!name.trim() || !category || price === '' || stock === '' || !description.trim()) {
       notifyWarning('Semua kolom wajib diisi sebelum menyimpan produk.');
       return;
     }
@@ -116,6 +123,8 @@ const Admin = () => {
         category: [category],
         description,
         price,
+        stock,
+        deposit: deposit === '' ? 0 : deposit,
       };
       // Saat edit tanpa gambar baru, gambar lama dipertahankan oleh server.
       if (image) payload.image = await readAsDataURL(image);
@@ -238,6 +247,28 @@ const Admin = () => {
               />
             </div>
             <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Jumlah Unit (Stok)</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="3"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Deposit per Unit (Rp)</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                value={deposit}
+                onChange={(e) => setDeposit(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
                 Image Of Product
                 {editingProduct && (
@@ -297,6 +328,8 @@ const Admin = () => {
                   <th className="px-3 py-3">Category</th>
                   <th className="px-3 py-3">Description</th>
                   <th className="px-3 py-3">Price</th>
+                  <th className="px-3 py-3 text-center">Stok</th>
+                  <th className="px-3 py-3">Deposit</th>
                   <th className="px-3 py-3 text-center">Action</th>
                 </tr>
               </thead>
@@ -332,6 +365,18 @@ const Admin = () => {
                     <td className="whitespace-nowrap px-3 py-3 font-medium">
                       {formatRupiah(product.price)}
                     </td>
+                    <td className="px-3 py-3 text-center">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          product.stock > 0 ? 'bg-gray-100 text-gray-700' : 'bg-red-100 text-red-700'
+                        }`}
+                      >
+                        {product.stock} unit
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-gray-600">
+                      {product.deposit > 0 ? formatRupiah(product.deposit) : '—'}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-3 text-center">
                       <button
                         onClick={() => handleEdit(product.id)}
@@ -350,7 +395,7 @@ const Admin = () => {
                 ))}
                 {filteredProducts.length === 0 && (
                   <tr>
-                    <td colSpan="7" className="px-3 py-10 text-center text-gray-400">
+                    <td colSpan="9" className="px-3 py-10 text-center text-gray-400">
                       Tidak ada produk.
                     </td>
                   </tr>

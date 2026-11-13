@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import api from "../api";
 import Header from "./Header";
 import DashboardLayout from "./DashboardLayout";
-import { clearSession, isAdminUser, isLoggedIn } from "../auth";
+import { clearSession, isLoggedIn } from "../auth";
 
 const Spinner = () => (
   <div className="flex h-screen items-center justify-center gap-3">
@@ -12,22 +12,17 @@ const Spinner = () => (
   </div>
 );
 
-// Halaman publik (Home, Contact, Detail, Cart):
-// pengunjung -> Header biasa, user -> sidebar user, admin -> dialihkan ke /admin.
-export const PublicLayout = () => {
-  if (isAdminUser()) return <Navigate to="/admin" replace />;
-  if (isLoggedIn()) return <DashboardLayout role="user" />;
-  return (
-    <>
-      <Header />
-      <Outlet />
-    </>
-  );
-};
+// Halaman publik (etalase): header biasa untuk semua pengunjung.
+export const PublicLayout = () => (
+  <>
+    <Header />
+    <Outlet />
+  </>
+);
 
-// Login & Register: yang sudah login tidak perlu melihatnya lagi.
+// Halaman login: admin yang sudah login langsung diarahkan ke dashboard.
 export const GuestLayout = () => {
-  if (isLoggedIn()) return <Navigate to={isAdminUser() ? "/admin" : "/"} replace />;
+  if (isLoggedIn()) return <Navigate to="/admin" replace />;
   return (
     <>
       <Header />
@@ -36,10 +31,10 @@ export const GuestLayout = () => {
   );
 };
 
-// Halaman admin: role diverifikasi ke server, bukan dipercaya dari localStorage.
+// Halaman admin: sesi diverifikasi ke server, bukan dipercaya dari localStorage.
 // Selama belum terverifikasi, tidak ada isi dashboard yang dirender.
 export const AdminLayout = () => {
-  const [status, setStatus] = useState("checking"); // checking | ok | user | guest
+  const [status, setStatus] = useState("checking"); // checking | ok | guest
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +49,7 @@ export const AdminLayout = () => {
         const { data } = await api.get("/auth/me");
         if (cancelled) return;
         localStorage.setItem("user", JSON.stringify(data.user));
-        setStatus(data.user.role === "admin" ? "ok" : "user");
+        setStatus("ok");
       } catch {
         if (cancelled) return;
         clearSession();
@@ -70,6 +65,5 @@ export const AdminLayout = () => {
 
   if (status === "checking") return <Spinner />;
   if (status === "guest") return <Navigate to="/login" replace />;
-  if (status === "user") return <Navigate to="/" replace />;
-  return <DashboardLayout role="admin" />;
+  return <DashboardLayout />;
 };

@@ -1,14 +1,9 @@
-// Membuat tabel dan akun admin awal. Jalankan sekali: npm run db:init
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+// Menjalankan migrasi lalu memastikan akun admin awal ada. Aman dijalankan berulang: npm run db:init
 import bcrypt from "bcryptjs";
 import pool from "./db.js";
+import { migrate } from "./migrate.js";
 
-const dir = path.dirname(fileURLToPath(import.meta.url));
-
-const sql = fs.readFileSync(path.join(dir, "schema.sql"), "utf8");
-await pool.query(sql);
+await migrate();
 
 const adminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const adminPassword = process.env.ADMIN_PASSWORD || "admin123";

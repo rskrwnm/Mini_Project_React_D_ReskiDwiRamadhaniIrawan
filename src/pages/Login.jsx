@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import api, { getErrorMessage } from "../api";
 
+// Login khusus admin.
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -15,14 +16,13 @@ const Login = () => {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "Email and password are required!",
+        text: "Email dan password wajib diisi!",
       });
       return;
     }
 
     try {
       const { data } = await api.post("/auth/login", { email, password });
-      const isAdmin = data.user.role === "admin";
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("isLoggedIn", true);
@@ -30,32 +30,31 @@ const Login = () => {
 
       Swal.fire({
         icon: "success",
-        title: isAdmin ? "Admin Successfully Logged In!" : "Successfully Logged In!",
-        confirmButtonText: "OK",
-      }).then((res) => {
-        if (res.isConfirmed) {
-          navigate(isAdmin ? "/admin" : "/");
-        }
-      });
+        title: "Berhasil login!",
+        timer: 1200,
+        showConfirmButton: false,
+      }).then(() => navigate("/admin"));
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: getErrorMessage(error, "Login failed. Please try again."),
+        text: getErrorMessage(error, "Login gagal. Silakan coba lagi."),
       });
     }
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
+    <div className="flex min-h-[80vh] items-center justify-center px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-80">
-        <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
+        <h1 className="text-2xl font-bold mb-1 text-center">Login Admin</h1>
+        <p className="mb-4 text-center text-sm text-gray-500">Khusus pengelola RentCampy</p>
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700">
               Email:
             </label>
             <input
+              id="email"
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -67,6 +66,7 @@ const Login = () => {
               Password:
             </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -75,15 +75,14 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
+            className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 text-center"
           >
             Login
           </button>
         </form>
         <div className="text-center mt-4">
-          Don't have an account?{" "}
-          <Link className="text-blue-600 hover:underline" to="/Register">
-            Register
+          <Link className="text-sm text-blue-600 hover:underline" to="/">
+            ← Kembali ke beranda
           </Link>
         </div>
       </div>

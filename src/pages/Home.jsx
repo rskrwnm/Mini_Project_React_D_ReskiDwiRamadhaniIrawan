@@ -1,74 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { addItem } from '../features/cartSlice';
-import Swal from 'sweetalert2';
+import { fetchWaNumber, openWhatsApp } from '../wa';
 
 import Card from '../components/Card';
 
 const FEATURES = [
   { icon: '💰', title: 'Harga Terjangkau', text: 'Sewa per hari dengan harga bersahabat untuk kantong mahasiswa.' },
   { icon: '✅', title: 'Kualitas Terjamin', text: 'Semua perlengkapan dicek dan dirawat sebelum disewakan.' },
-  { icon: '🏕️', title: 'Lengkap', text: 'Tenda, alat tidur, hingga peralatan masak tersedia di satu tempat.' },
+  { icon: '💬', title: 'Sewa Lewat WhatsApp', text: 'Pilih alat, klik tombol WhatsApp, dan admin kami siap membantu.' },
 ];
 
 const Home = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const productsRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-
-  const fetchData = async () => {
-    try {
-      const response = await api.get("/products");
-
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddToCart = (product) => {
-    if (!isLoggedIn) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Sorry, you need to Sign-in to add items to the cart.",
-        showCancelButton: true,
-        cancelButtonColor: "#d33",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: "#1976D2",
-        confirmButtonText: "Log in",
-        reverseButtons: true,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate("/login");
-        }
-      });
-      return;
-    }
-
-    const newItem = {
-      id: product?.id,
-      name: product?.name,
-      image: product?.image,
-      category: product?.category,
-      description: product?.description,
-      price: product?.price,
-    };
-
-    dispatch(addItem(newItem));
-    navigate("/cart");
-  };
+  const [waNumber, setWaNumber] = useState('');
 
   useEffect(() => {
-    fetchData();
+    document.title = 'RentCampy - Sewa Perlengkapan Camping';
+
+    api
+      .get('/products')
+      .then((res) => setProducts(res.data))
+      .catch((error) => console.error('Error fetching data:', error))
+      .finally(() => setLoading(false));
+
+    fetchWaNumber().then(setWaNumber);
   }, []);
 
   const keyword = search.trim().toLowerCase();
@@ -76,7 +36,8 @@ const Home = () => {
     ? products.filter(
         (p) =>
           p.name.toLowerCase().includes(keyword) ||
-          p.description?.toLowerCase().includes(keyword)
+          p.description?.toLowerCase().includes(keyword) ||
+          p.category.some((c) => c.toLowerCase().includes(keyword))
       )
     : products;
 
@@ -96,22 +57,12 @@ const Home = () => {
               Temukan perlengkapan camping berkualitas dengan harga terjangkau.
               Petualanganmu dimulai dari sini.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={() => productsRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="rounded-full bg-amber-400 px-7 py-3 font-semibold text-gray-900 shadow-lg transition hover:bg-amber-300"
-              >
-                Lihat Produk
-              </button>
-              {!isLoggedIn && (
-                <button
-                  onClick={() => navigate('/register')}
-                  className="rounded-full border-2 border-white px-7 py-3 font-semibold transition hover:bg-white hover:text-emerald-700"
-                >
-                  Daftar Sekarang
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => productsRef.current?.scrollIntoView({ behavior: 'smooth' })}
+              className="rounded-full bg-amber-400 px-7 py-3 font-semibold text-gray-900 shadow-lg transition hover:bg-amber-300"
+            >
+              Lihat Produk
+            </button>
           </div>
           <div className="flex justify-center md:w-1/2">
             <img
@@ -143,7 +94,7 @@ const Home = () => {
           <p className="mt-1 text-gray-500">Pilih perlengkapan sesuai kebutuhan campingmu</p>
         </div>
 
-        <div className="mx-auto mb-6 max-w-xl">
+        <div className="mx-auto mb-8 max-w-xl">
           <div className="relative">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -181,27 +132,16 @@ const Home = () => {
           </div>
         ) : visibleProducts.length === 0 ? (
           <p className="py-20 text-center text-gray-400">
-            {keyword
-              ? `Produk "${search.trim()}" tidak ditemukan.`
-              : 'Belum ada produk.'}
+            {keyword ? `Produk "${search.trim()}" tidak ditemukan.` : 'Belum ada produk.'}
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {visibleProducts.map((product) => (
               <Card
                 key={product.id}
-                id={product.id}
-                name={product.name}
-                category={product.category}
-                image={product.image}
-                price={product.price}
-                showCartButton={true}
-                handleNavigateDetails={() => {
-                  navigate(`/productdetail/${product.id}`, {
-                    state: { product },
-                  });
-                }}
-                handleAddtoCart={() => handleAddToCart(product)}
+                product={product}
+                onDetail={() => navigate(`/productdetail/${product.id}`)}
+                onWhatsApp={() => openWhatsApp(waNumber, product)}
               />
             ))}
           </div>

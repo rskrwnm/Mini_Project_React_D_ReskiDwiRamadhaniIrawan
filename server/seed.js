@@ -4,9 +4,13 @@ import pool from "./db.js";
 
 const COLORS = {
   Tenda: "#2e7d32",
+  Carrier: "#6a1b9a",
   "Alat Tidur": "#1565c0",
   "Peralatan Masak": "#ef6c00",
 };
+
+// Deposit per unit untuk data dummy (bisa diubah lewat Kelola Produk).
+const DEPOSIT = { Tenda: 50000, Carrier: 30000, "Alat Tidur": 25000, "Peralatan Masak": 20000 };
 
 // Gambar placeholder berupa SVG (data URL) agar tidak butuh file/koneksi luar.
 const makeImage = (name, category) => {
@@ -22,6 +26,8 @@ const products = [
   ["Tenda Dome 2 Orang", "Tenda", "Tenda dome ringan untuk 2 orang, double layer, anti air dan mudah dipasang. Cocok untuk pendakian.", 50000],
   ["Tenda Dome 4 Orang", "Tenda", "Tenda dome kapasitas 4 orang dengan ruang luas dan ventilasi baik. Cocok untuk camping keluarga.", 80000],
   ["Tenda Family 6 Orang", "Tenda", "Tenda besar untuk 6 orang dengan dua pintu dan teras. Ideal untuk camping rombongan.", 120000],
+  ["Carrier 60L", "Carrier", "Tas carrier 60 liter dengan rangka, rain cover, dan busa punggung tebal. Cocok untuk pendakian 2-3 hari.", 30000],
+  ["Carrier 40L", "Carrier", "Tas carrier 40 liter yang ringan untuk pendakian singkat atau tektok.", 20000],
   ["Tenda Ultralight 1 Orang", "Tenda", "Tenda super ringan untuk solo hiking, berat hanya sekitar 1,5 kg dan ringkas saat dilipat.", 40000],
   ["Sleeping Bag Polar", "Alat Tidur", "Sleeping bag bahan polar yang hangat dan nyaman, cocok untuk suhu dingin di pegunungan.", 25000],
   ["Sleeping Bag Dacron", "Alat Tidur", "Sleeping bag dacron ringan dan mudah dicuci, cocok untuk camping di dataran rendah.", 20000],
@@ -39,9 +45,9 @@ if (rows[0].n > 0) {
 } else {
   for (const [name, category, description, price] of products) {
     await pool.query(
-      `INSERT INTO products (name, category, image, description, price)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [name, [category], makeImage(name, category), description, price]
+      `INSERT INTO products (name, category, image, description, price, stock, deposit)
+       VALUES ($1, $2, $3, $4, $5, 3, $6)`,
+      [name, [category], makeImage(name, category), description, price, DEPOSIT[category]]
     );
   }
   console.log(`${products.length} produk dummy ditambahkan.`);
